@@ -64,7 +64,7 @@ def run(con: sqlite3.Connection, sql: str) -> list[dict]:
     {"columns": [...], "rows": [...]} for queries, {"changed": n, "verb": ...} for the rest.
     On failure raises RunError (with the results that did run)."""
     out = []
-    for stmt in split_statements(sql):
+    for stmt in split_statements(sql.replace("﻿", "")):
         if _only_comments(stmt):
             continue
         before = con.total_changes

@@ -38,6 +38,7 @@ def repl():
         except (EOFError, KeyboardInterrupt):
             print()
             return
+        line = line.replace("﻿", "")  # PowerShell pipes can add an invisible BOM
         cmd = line.strip()
         if not buf and cmd in (".quit", ".exit", "exit", "quit"):
             return
@@ -64,7 +65,13 @@ def main():
         return
     arg = sys.argv[1]
     path = Path(arg)
-    sql = path.read_text(encoding="utf-8") if path.suffix == ".sql" and path.exists() else arg
+    if path.suffix.lower() == ".sql" and " " not in arg.strip():
+        if not path.exists():
+            print(f"Error: file not found: {arg}")
+            sys.exit(1)
+        sql = path.read_text(encoding="utf-8-sig")  # -sig drops a BOM (Notepad/PowerShell add one)
+    else:
+        sql = arg
     execute(fresh_db(), sql)
 
 
